@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation("androidx.compose.material:material-icons-extended")
+
     // --- Navegación Compose ---
     implementation("androidx.navigation:navigation-compose:2.8.3")
 

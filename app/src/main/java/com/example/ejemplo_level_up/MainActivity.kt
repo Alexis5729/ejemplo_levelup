@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EjemplolevelupTheme {
+            EjemplolevelupTheme(darkTheme = true, dynamicColor = false) {
                 val nav = rememberNavController()
                 AppNav(nav)
             }
