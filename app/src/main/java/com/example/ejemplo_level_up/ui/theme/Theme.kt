@@ -14,22 +14,16 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary        = NeonBlue,
     onPrimary      = TextPrimary,
-
     secondary      = NeonGreen,
     onSecondary    = TextPrimary,
-
     tertiary       = NeonCyan,
     onTertiary     = TextPrimary,
-
     background     = DarkBg,
     onBackground   = TextSecondary,
-
     surface        = DarkSurface,
     onSurface      = TextPrimary,
-
     surfaceVariant = SurfaceDim,
     onSurfaceVariant = TextSecondary,
-
     outline        = OutlineNeon
 )
 
@@ -63,7 +57,7 @@ fun EjemplolevelupTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,  // deja tu Typography/Type como lo tengas
+        typography = Typography,
         content = content
     )
 }

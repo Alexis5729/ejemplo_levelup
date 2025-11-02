@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,40 +30,37 @@ fun CategoriesScreen(
     onOpenDetail: (String) -> Unit,
     onBack: () -> Unit,
     onOpenCart: () -> Unit, // 🛒 nuevo parámetro agregado
-    user: UserProfile?,
-    isLoggedIn: Boolean,
-    onLogout: () -> Unit
 ) {
     Scaffold(
         containerColor = Color(0xFF0A0A0A), // Fondo oscuro consistente
 
         topBar = {
-            Column {
-                // 🔹 Barra superior combinada (usuario + carrito + logout)
-                MainTopBar(
-                    user = user,
-                    isLoggedIn = isLoggedIn,
-                    onLogout = onLogout,
-                    onCartClick = onOpenCart // ✅ conecta el ícono del carrito
+            TopAppBar(
+                title = {
+                    Text("Categorías", color = MaterialTheme.colorScheme.primary)
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onOpenCart) {
+                        Icon(
+                            imageVector = Icons.Filled.ShoppingCart,
+                            contentDescription = "Carrito",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
-
-                // 🔹 Título + botón volver
-                TopAppBar(
-                    title = { Text("Categorías", color = Color(0xFF00C8FF)) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Volver",
-                                tint = Color(0xFF00C8FF)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF0A0A0A)
-                    )
-                )
-            }
+            )
         }
     ) { padding ->
 

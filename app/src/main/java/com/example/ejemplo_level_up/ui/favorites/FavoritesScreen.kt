@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,83 +23,58 @@ import com.example.ejemplo_level_up.viewmodel.HomeViewModel
 @Composable
 fun FavoritesScreen(
     onOpenDetail: (String) -> Unit,
-    onBack: () -> Unit,
-    onOpenCart: () -> Unit, // 🛒 nuevo parámetro agregado
-    user: UserProfile?,
-    isLoggedIn: Boolean,
-    onLogout: () -> Unit,
+    onBack: () -> Unit,                 // ← nuevo
+    onOpenCart: () -> Unit,             // ← nuevo
     fvm: FavoritesViewModel = viewModel(),
     hvm: HomeViewModel = viewModel()
 ) {
     val favs by fvm.favIds.collectAsState(initial = emptySet())
     val games by hvm.games.collectAsState()
-
-    // 🔹 Mantiene actualizada la lista de favoritos sin parpadeo
     val favGames = remember(favs, games) { games.filter { it.id in favs } }
 
     Scaffold(
-        containerColor = Color(0xFF0A0A0A), // Fondo oscuro coherente con tu app
-
-        // ✅ Barra superior: saludo + carrito + logout + botón volver
         topBar = {
-            Column {
-                MainTopBar(
-                    user = user,
-                    isLoggedIn = isLoggedIn,
-                    onLogout = onLogout,
-                    onCartClick = onOpenCart // 🛒 conecta el icono del carrito
+            TopAppBar(
+                title = { Text("Favoritos", color = MaterialTheme.colorScheme.primary) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onOpenCart) {
+                        Icon(
+                            imageVector = Icons.Filled.ShoppingCart,
+                            contentDescription = "Carrito",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
-
-                TopAppBar(
-                    title = { Text("Favoritos", color = Color(0xFF00C8FF)) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Volver",
-                                tint = Color(0xFF00C8FF)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF0A0A0A)
-                    )
-                )
-            }
+            )
         }
     ) { padding ->
-
-        // ---------- CONTENIDO ----------
         if (favGames.isEmpty()) {
             Text(
-                text = "No tienes productos en favoritos.",
-                color = Color(0xFFB0B0B0),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .padding(padding)
-                    .padding(16.dp)
+                "Sin favoritos",
+                Modifier.padding(padding).padding(16.dp),
+                color = MaterialTheme.colorScheme.onBackground
             )
         } else {
             LazyColumn(contentPadding = padding) {
                 items(favGames) { g ->
                     ListItem(
-                        headlineContent = {
-                            Text(
-                                text = g.title,
-                                color = Color(0xFF00C8FF),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        },
-                        supportingContent = {
-                            Text(
-                                text = g.description,
-                                color = Color(0xFFB0B0B0),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        },
+                        headlineContent = { Text(g.title) },
+                        supportingContent = { Text(g.description) },
                         modifier = Modifier.clickable { onOpenDetail(g.id) }
                     )
-                    Divider(color = Color(0xFF1A1A1A))
+                    Divider()
                 }
             }
         }

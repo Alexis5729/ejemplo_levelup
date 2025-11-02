@@ -137,18 +137,7 @@ fun AppNav(nav: NavHostController) {
                 products = games,
                 onOpenDetail = { id -> nav.navigate("detail/$id") },
                 onBack = { nav.popBackStack() },
-                onOpenCart = { nav.navigate(Routes.CART) }, // ✅ integración carrito
-                user = user,
-                isLoggedIn = isLoggedIn,
-                onLogout = {
-                    user = UserProfile()
-                    isLoggedIn = false
-                    nav.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.HOME) { inclusive = true }
-                        launchSingleTop = true
-                        restoreState = false
-                    }
-                }
+                onOpenCart = { nav.navigate(Routes.CART) }// ✅ integración carrito
             )
         }
 
@@ -157,18 +146,7 @@ fun AppNav(nav: NavHostController) {
             FavoritesScreen(
                 onOpenDetail = { nav.navigate("detail/$it") },
                 onBack = { nav.popBackStack() },
-                onOpenCart = { nav.navigate(Routes.CART) }, // ✅ integración carrito
-                user = user,
-                isLoggedIn = isLoggedIn,
-                onLogout = {
-                    user = UserProfile()
-                    isLoggedIn = false
-                    nav.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.HOME) { inclusive = true }
-                        launchSingleTop = true
-                        restoreState = false
-                    }
-                }
+                onOpenCart = { nav.navigate(Routes.CART) } // ✅ integración carrito
             )
         }
 
