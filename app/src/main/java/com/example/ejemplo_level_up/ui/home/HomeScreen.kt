@@ -137,27 +137,6 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // --- Banner / Promociones ---
-            ElevatedCard(
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(120.dp)
-            ) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart) {
-                    Text(
-                        "Promociones Especiales",
-                        color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
 
             // --- Destacados ---
             SectionTitle("Destacados")
@@ -203,7 +182,7 @@ private fun SectionTitle(text: String) {
 private fun ProductCardHorizontal(g: Game, onOpenDetail: (String) -> Unit) {
     ElevatedCard(
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
         modifier = Modifier
             .width(260.dp)

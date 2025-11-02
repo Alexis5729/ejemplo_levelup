@@ -24,7 +24,8 @@ private val DarkColorScheme = darkColorScheme(
     onSurface      = TextPrimary,
     surfaceVariant = SurfaceDim,
     onSurfaceVariant = TextSecondary,
-    outline        = OutlineNeon
+    outline        = OutlineNeon,
+    surfaceBright    = CarrouselH
 )
 
 // (Opcional) Un claro mínimo, por si activas light
