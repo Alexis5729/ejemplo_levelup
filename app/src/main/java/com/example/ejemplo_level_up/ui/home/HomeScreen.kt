@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -12,12 +11,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.ShoppingCart
-
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejemplo_level_up.R
 import com.example.ejemplo_level_up.data.model.Game
+import com.example.ejemplo_level_up.ui.components.MainTopBar
+import com.example.ejemplo_level_up.ui.profile.UserProfile
 import com.example.ejemplo_level_up.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,13 +37,18 @@ fun HomeScreen(
     onOpenFavs: () -> Unit,
     onOpenQr: () -> Unit,
     onOpenCategories: () -> Unit,
+    onOpenProfile: () -> Unit,
+    onOpenCart: () -> Unit, // ✅ Abre el carrito
+    user: UserProfile?,
+    isLoggedIn: Boolean,
+    onLogout: () -> Unit,
     vm: HomeViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) { vm.seed() }
 
     val games by vm.games.collectAsState(initial = emptyList())
 
-    // UI state
+    // Estado UI
     var query by rememberSaveable { mutableStateOf("") }
     val categories = listOf("Periféricos", "Accesorios", "Juegos", "Consolas", "PC", "Ofertas")
     var selectedCat by rememberSaveable { mutableStateOf(0) }
@@ -55,45 +56,18 @@ fun HomeScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+
+        // ✅ TopBar con carrito funcional
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(R.drawable.logo_levelup),
-                            contentDescription = "Level-Up Gamer",
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text("Level-Up Gamer", color = MaterialTheme.colorScheme.primary)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                actions = {
-                    IconButton(onClick = onOpenFavs) {
-                        Icon(
-                            Icons.Filled.Favorite,
-                            contentDescription = "Favoritos",
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    IconButton(onClick = onOpenQr) {
-                        Icon(
-                            Icons.Filled.QrCode,
-                            contentDescription = "QR",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Icon(
-                        imageVector = Icons.Filled.ShoppingCart,
-                        contentDescription = "Carrito",
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                }
+            MainTopBar(
+                user = user,
+                isLoggedIn = isLoggedIn,
+                onLogout = onLogout,
+                onCartClick = onOpenCart // ✅ AHORA FUNCIONA DESDE HOME
             )
         },
+
+        // ✅ Barra de navegación inferior
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
                 NavigationBarItem(
@@ -120,6 +94,12 @@ fun HomeScreen(
                     icon = { Icon(Icons.Filled.QrCode, contentDescription = "QR") },
                     label = { Text("QR") }
                 )
+                NavigationBarItem(
+                    selected = bottomSelected == 4,
+                    onClick = { bottomSelected = 4; onOpenProfile() },
+                    icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
+                    label = { Text("Perfil") }
+                )
             }
         }
     ) { padding ->
@@ -129,13 +109,12 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
         ) {
-
-            // --- Buscador (estilo Falabella) ---
+            // --- Buscador ---
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
                 placeholder = { Text("¿Qué quieres buscar?") },
-                leadingIcon = { Icon(Icons.Filled.QrCode, contentDescription = null) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -158,7 +137,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // --- Banner / carrusel simple (placeholder visual) ---
+            // --- Banner / Promociones ---
             ElevatedCard(
                 colors = CardDefaults.elevatedCardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -180,7 +159,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // --- Destacados (lista horizontal) ---
+            // --- Destacados ---
             SectionTitle("Destacados")
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
@@ -191,7 +170,7 @@ fun HomeScreen(
                 }
             }
 
-            // --- Catálogo (grid 2 columnas) ---
+            // --- Catálogo ---
             SectionTitle("Todos los productos")
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -241,7 +220,7 @@ private fun ProductCardHorizontal(g: Game, onOpenDetail: (String) -> Unit) {
                 painter = painterResource(id = resId),
                 contentDescription = g.title,
                 modifier = Modifier
-                    .size(64.dp)              // o .height(90.dp) en la grid
+                    .size(64.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )

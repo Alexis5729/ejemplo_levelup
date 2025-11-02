@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
+
     implementation("androidx.compose.material:material-icons-extended")
 
     // --- Navegación Compose ---

@@ -10,52 +10,79 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.ejemplo_level_up.R
 import com.example.ejemplo_level_up.data.model.Game
+import com.example.ejemplo_level_up.ui.components.MainTopBar
+import com.example.ejemplo_level_up.ui.profile.UserProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriesScreen(
     products: List<Game>,
     onOpenDetail: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenCart: () -> Unit, // 🛒 nuevo parámetro agregado
+    user: UserProfile?,
+    isLoggedIn: Boolean,
+    onLogout: () -> Unit
 ) {
     Scaffold(
+        containerColor = Color(0xFF0A0A0A), // Fondo oscuro consistente
+
         topBar = {
-            TopAppBar(
-                title = { Text("Categorías", color = MaterialTheme.colorScheme.primary) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+            Column {
+                // 🔹 Barra superior combinada (usuario + carrito + logout)
+                MainTopBar(
+                    user = user,
+                    isLoggedIn = isLoggedIn,
+                    onLogout = onLogout,
+                    onCartClick = onOpenCart // ✅ conecta el ícono del carrito
                 )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
+
+                // 🔹 Título + botón volver
+                TopAppBar(
+                    title = { Text("Categorías", color = Color(0xFF00C8FF)) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = Color(0xFF00C8FF)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color(0xFF0A0A0A)
+                    )
+                )
+            }
+        }
     ) { padding ->
 
+        // ---------- CONTENIDO ----------
         if (products.isEmpty()) {
+            // 🔸 Vista cuando no hay productos
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentAlignment = androidx.compose.ui.Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
-                Text("No hay productos disponibles", color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    text = "No hay productos disponibles.",
+                    color = Color(0xFFB0B0B0),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         } else {
+            // 🔸 Vista de grilla de productos
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(12.dp),
@@ -66,17 +93,25 @@ fun CategoriesScreen(
                 items(products) { g ->
                     ElevatedCard(
                         colors = CardDefaults.elevatedCardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = Color(0xFF1A1A1A)
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onOpenDetail(g.id.toString()) }
                     ) {
-                        Column(Modifier.padding(12.dp)) {
+                        Column(
+                            Modifier
+                                .padding(12.dp)
+                                .fillMaxWidth()
+                        ) {
                             val ctx = LocalContext.current
+
+                            // 🔹 Carga segura de imagen con fallback
                             val resId = remember(g.imageResName, ctx) {
                                 ctx.resources.getIdentifier(
-                                    g.imageResName, "drawable", ctx.packageName
+                                    g.imageResName,
+                                    "drawable",
+                                    ctx.packageName
                                 )
                             }.takeIf { it != 0 } ?: R.drawable.ic_launcher_foreground
 
@@ -89,15 +124,25 @@ fun CategoriesScreen(
                             )
 
                             Spacer(Modifier.height(8.dp))
+
                             Text(
-                                g.title,
-                                color = MaterialTheme.colorScheme.primary,
+                                text = g.title,
+                                color = Color(0xFF00C8FF),
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 2
                             )
-                            Text("Precio: $${g.price}")
+
+                            Text(
+                                text = "Precio: $${g.price}",
+                                color = Color(0xFFB0B0B0)
+                            )
+
                             g.offerPrice?.let {
-                                Text("Oferta: $${it}", color = MaterialTheme.colorScheme.secondary)
+                                Text(
+                                    text = "Oferta: $${it}",
+                                    color = Color(0xFFFFC107),
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }
