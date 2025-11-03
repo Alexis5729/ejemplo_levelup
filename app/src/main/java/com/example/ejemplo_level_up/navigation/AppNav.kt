@@ -195,11 +195,10 @@ fun AppNav(nav: NavHostController) {
                 ProfileScreen(
                     userData = user,
                     onEditProfile = { nav.navigate(Routes.EDIT_PROFILE) },
-                    onPromoCode = { /* futuras promociones */ },
                     onBack = {
                         if (!nav.popBackStack()) nav.navigate(Routes.HOME)
                     },
-                    onOpenCart = { nav.navigate(Routes.CART) }, // ✅ integración carrito
+                    onOpenCart = { nav.navigate(Routes.CART) },
                     user = user,
                     isLoggedIn = isLoggedIn,
                     onLogout = {
@@ -212,14 +211,9 @@ fun AppNav(nav: NavHostController) {
                         }
                     }
                 )
-            } else {
-                nav.navigate(Routes.LOGIN) {
-                    popUpTo(Routes.HOME) { inclusive = true }
-                    launchSingleTop = true
-                    restoreState = false
-                }
             }
         }
+
 
         // ---------- EDITAR PERFIL ----------
         composable(Routes.EDIT_PROFILE) {

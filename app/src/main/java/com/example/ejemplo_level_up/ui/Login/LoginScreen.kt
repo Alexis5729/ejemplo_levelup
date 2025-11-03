@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ejemplo_level_up.R
+import com.example.ejemplo_level_up.data.UserManager
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,12 +26,18 @@ fun LoginScreen(
     onRegisterClick: () -> Unit,
     onBack: (() -> Unit)? = null
 ) {
-    var email by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val userManager = remember { UserManager(context) }
+
+    // 🔹 Cargar último correo usado
+    val lastEmail = userManager.getLastEmail() ?: ""
+    var email by remember { mutableStateOf(lastEmail) }
     var password by remember { mutableStateOf("") }
+
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    // Ocultar alerta tras unos segundos
+    // 🔹 Ocultar alerta tras unos segundos
     LaunchedEffect(showError) {
         if (showError) {
             delay(4000)
@@ -76,7 +84,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Título principal
+            // 🟦 Título principal
             Text(
                 text = "Ingresa a nuestro portal!\nLevel-Up Gamer",
                 fontSize = 24.sp,
@@ -85,7 +93,7 @@ fun LoginScreen(
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
-            // Campo de correo
+            // 🔹 Campo de correo
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -102,7 +110,7 @@ fun LoginScreen(
                 )
             )
 
-            // Campo de contraseña
+            // 🔹 Campo de contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -122,7 +130,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón de iniciar sesión
+            // 🔹 Botón de iniciar sesión
             Button(
                 onClick = {
                     when {
@@ -130,16 +138,37 @@ fun LoginScreen(
                             errorMessage = "Por favor completa ambos campos."
                             showError = true
                         }
+
                         !email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) -> {
                             errorMessage = "El correo electrónico no es válido."
                             showError = true
                         }
+
                         password.length < 6 -> {
                             errorMessage = "La contraseña debe tener al menos 6 caracteres."
                             showError = true
                         }
+
                         else -> {
-                            onLoginSuccess()
+                            // 🔐 Validación con UserManager
+                            when {
+                                !userManager.isUserRegistered(email) -> {
+                                    errorMessage = "Este correo no está registrado. Por favor regístrate primero."
+                                    showError = true
+                                }
+
+                                !userManager.validateUser(email, password) -> {
+                                    errorMessage = "Contraseña incorrecta. Intenta nuevamente."
+                                    showError = true
+                                }
+
+                                else -> {
+                                    // ✅ Guarda sesión y correo
+                                    userManager.setLoggedInUser(email)
+                                    userManager.setLastEmail(email)
+                                    onLoginSuccess()
+                                }
+                            }
                         }
                     }
                 },
@@ -153,6 +182,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // 🔹 Botón de registro
             OutlinedButton(
                 onClick = onRegisterClick,
                 border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp),
@@ -166,7 +196,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Alerta de error (evita parpadeo)
+            // 🔹 Alerta de error
             if (showError) {
                 AlertDialog(
                     onDismissRequest = { showError = false },

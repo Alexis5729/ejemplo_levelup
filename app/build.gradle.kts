@@ -50,6 +50,12 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
 
+
+    //implementacion del codigo para subir imagen a perfil
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+
+
     implementation("androidx.compose.material:material-icons-extended")
 
     // --- Navegación Compose ---

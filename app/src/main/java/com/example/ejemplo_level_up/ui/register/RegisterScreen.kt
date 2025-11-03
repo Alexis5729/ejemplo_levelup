@@ -7,10 +7,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ejemplo_level_up.data.UserManager
 import com.example.ejemplo_level_up.ui.profile.UserProfile
 import kotlinx.coroutines.delay
 
@@ -20,6 +22,9 @@ fun RegisterScreen(
     onRegisterSuccess: (UserProfile) -> Unit,
     onBackToLogin: () -> Unit
 ) {
+    val context = LocalContext.current
+    val userManager = remember { UserManager(context) }
+
     var nombre by remember { mutableStateOf("") }
     var apellido by remember { mutableStateOf("") }
     var rut by remember { mutableStateOf("") }
@@ -32,12 +37,14 @@ fun RegisterScreen(
 
     var showError by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+    var showSuccess by remember { mutableStateOf(false) }
 
     // 🔹 Cierra alerta automáticamente después de unos segundos
-    LaunchedEffect(showError) {
-        if (showError) {
+    LaunchedEffect(showError, showSuccess) {
+        if (showError || showSuccess) {
             delay(4000)
             showError = false
+            showSuccess = false
         }
     }
 
@@ -113,7 +120,15 @@ fun RegisterScreen(
                             showError = true
                         }
 
+                        userManager.isUserRegistered(correo) -> {
+                            errorMessage = "Este correo ya está registrado. Intenta iniciar sesión."
+                            showError = true
+                        }
+
                         else -> {
+                            // Guardar usuario
+                            userManager.registerUser(correo, contrasena)
+
                             val nuevoUsuario = UserProfile(
                                 firstName = nombre,
                                 lastName = apellido,
@@ -123,6 +138,8 @@ fun RegisterScreen(
                                 phone = telefono,
                                 email = correo
                             )
+
+                            showSuccess = true
                             onRegisterSuccess(nuevoUsuario)
                         }
                     }
@@ -149,7 +166,7 @@ fun RegisterScreen(
                 Text("Cancelar", fontSize = 16.sp)
             }
 
-            // 🔹 Alerta de validación
+            // 🔹 Alerta de error
             if (showError) {
                 AlertDialog(
                     onDismissRequest = { showError = false },
@@ -162,6 +179,23 @@ fun RegisterScreen(
                     text = { Text(errorMessage) },
                     containerColor = Color(0xFF1A1A1A),
                     titleContentColor = Color(0xFFFF6B6B),
+                    textContentColor = Color.White
+                )
+            }
+
+            // 🔹 Alerta de éxito
+            if (showSuccess) {
+                AlertDialog(
+                    onDismissRequest = { showSuccess = false },
+                    confirmButton = {
+                        TextButton(onClick = { showSuccess = false }) {
+                            Text("Aceptar", color = Color(0xFF00C8FF))
+                        }
+                    },
+                    title = { Text("Registro exitoso") },
+                    text = { Text("Tu cuenta ha sido creada correctamente. ¡Ahora puedes iniciar sesión!") },
+                    containerColor = Color(0xFF1A1A1A),
+                    titleContentColor = Color(0xFF4CAF50),
                     textContentColor = Color.White
                 )
             }
