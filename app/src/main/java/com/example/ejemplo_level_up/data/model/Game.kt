@@ -10,5 +10,5 @@ data class Game(
     val price: Int,
     val offerPrice: Int?,
     val description: String,
-    val imageResName: String // nombre del drawable (ej: "elden_ring")
+    val imageResName: String // nombre del drawable (ej: "Catan")
 )
