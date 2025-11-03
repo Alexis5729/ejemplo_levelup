@@ -163,7 +163,7 @@ fun EditProfileScreen(
                             }
 
                             else -> {
-                                // ✅ Si se cambia la contraseña, la ignoramos para demo (no persistente)
+                                //  Si se cambia la contraseña, la ignoramos para demo (no persistente)
                                 showError = false
                                 onSave(editedUser)
                             }

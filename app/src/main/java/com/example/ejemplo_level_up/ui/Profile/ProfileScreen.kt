@@ -47,14 +47,14 @@ fun ProfileScreen(
     val context = LocalContext.current
     val userManager = remember { UserManager(context) }
 
-    // ✅ Estados de imagen conectados al ViewModel
+    //  Estados de imagen conectados al ViewModel
     var imageBitmap by remember { mutableStateOf(vm.imageBitmap) }
     var imageUri by remember { mutableStateOf(vm.imageUri) }
 
-    // ✅ Estado del diálogo de selección
+    //  Estado del diálogo de selección
     var showImageDialog by remember { mutableStateOf(false) }
 
-    // ✅ Launchers
+    //  Launchers
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
@@ -77,12 +77,12 @@ fun ProfileScreen(
         }
     }
 
-    // ✅ Estados del código promocional
+    //  Estados del código promocional
     var showPromoDialog by remember { mutableStateOf(false) }
     var promoCode by remember { mutableStateOf("") }
     var promoMessage by remember { mutableStateOf<String?>(null) }
 
-    // ✅ Alerta DUOC UC
+    // Alerta DUOC UC
     val isDuocUser = remember(userData.email) {
         userData.email.endsWith("@duocuc.cl", ignoreCase = true)
     }
@@ -96,10 +96,10 @@ fun ProfileScreen(
         }
     }
 
-    // ✅ Diálogo de confirmación de cierre de sesión
+    //  Diálogo de confirmación de cierre de sesión
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    // ✅ Interfaz principal
+    //  Interfaz principal
     AnimatedVisibility(visible = isLoggedIn) {
         Scaffold(
             containerColor = Color(0xFF0A0A0A),
@@ -173,7 +173,7 @@ fun ProfileScreen(
 
                 Spacer(Modifier.height(12.dp))
 
-                // 🔘 Botones de imagen
+                //  Botones de imagen
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = { showImageDialog = true },
@@ -216,7 +216,7 @@ fun ProfileScreen(
                     }
                 }
 
-                // 🧾 Datos del perfil
+                //  Datos del perfil
                 ElevatedCard(
                     colors = CardDefaults.elevatedCardColors(containerColor = Color(0xFF1A1A1A)),
                     shape = RoundedCornerShape(12.dp),
@@ -279,7 +279,7 @@ fun ProfileScreen(
         }
     }
 
-    // 📸 Diálogo de selección de imagen
+    //  Diálogo de selección de imagen
     if (showImageDialog) {
         AlertDialog(
             onDismissRequest = { showImageDialog = false },
@@ -307,7 +307,7 @@ fun ProfileScreen(
         )
     }
 
-    // 🎟️ Diálogo promocional
+    //  Diálogo promocional
     if (showPromoDialog) {
         AlertDialog(
             onDismissRequest = { showPromoDialog = false },
@@ -315,9 +315,9 @@ fun ProfileScreen(
                 TextButton(
                     onClick = {
                         if (promoCode.trim().equals("duocuc2025", ignoreCase = true)) {
-                            promoMessage = "✅ Código correcto. ¡Has ganado un 30% de descuento en tu próxima compra!"
+                            promoMessage = " Código correcto. ¡Has ganado un 30% de descuento en tu próxima compra!"
                         } else {
-                            promoMessage = "❌ Código inválido. Intenta nuevamente."
+                            promoMessage = " Código inválido. Intenta nuevamente."
                         }
                         showPromoDialog = false
                     }
@@ -348,14 +348,14 @@ fun ProfileScreen(
         )
     }
 
-    // 🔒 Diálogo de cierre de sesión
+    //  Diálogo de cierre de sesión
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        userManager.clearAllUsers() // 🔐 Borra los datos almacenados
+                        userManager.clearAllUsers() //  Borra los datos almacenados
                         showLogoutDialog = false
                         onLogout()
                     }
