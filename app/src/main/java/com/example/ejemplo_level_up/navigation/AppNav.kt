@@ -14,6 +14,8 @@ import com.example.ejemplo_level_up.ui.detail.DetailScreen
 import com.example.ejemplo_level_up.ui.favorites.FavoritesScreen
 import com.example.ejemplo_level_up.ui.home.HomeScreen
 import com.example.ejemplo_level_up.ui.login.LoginScreen
+import com.example.ejemplo_level_up.ui.map.MapScreen          // 🆕 IMPORT MAP
+import com.example.ejemplo_level_up.ui.mas.MasScreen
 import com.example.ejemplo_level_up.ui.profile.EditProfileScreen
 import com.example.ejemplo_level_up.ui.profile.ProfileScreen
 import com.example.ejemplo_level_up.ui.profile.UserProfile
@@ -34,6 +36,8 @@ object Routes {
     const val PROFILE = "profile"
     const val EDIT_PROFILE = "edit_profile"
     const val CART = "cart"
+    const val MAS = "mas"          // Pantalla "Más"
+    const val MAP = "map"          // 🆕 Pantalla del mapa
 }
 
 @Composable
@@ -113,7 +117,8 @@ fun AppNav(nav: NavHostController) {
                     if (isLoggedIn) nav.navigate(Routes.PROFILE)
                     else nav.navigate(Routes.LOGIN)
                 },
-                onOpenCart = { nav.navigate(Routes.CART) }, // 🛒 disponible siempre
+                onOpenCart = { nav.navigate(Routes.CART) },   // 🛒 disponible siempre
+                onOpenMore = { nav.navigate(Routes.MAS) },    // botón "Más" de la bottom bar
                 user = user,
                 isLoggedIn = isLoggedIn,
                 onLogout = {
@@ -137,7 +142,7 @@ fun AppNav(nav: NavHostController) {
                 products = games,
                 onOpenDetail = { id -> nav.navigate("detail/$id") },
                 onBack = { nav.popBackStack() },
-                onOpenCart = { nav.navigate(Routes.CART) }// ✅ integración carrito
+                onOpenCart = { nav.navigate(Routes.CART) } // ✅ integración carrito
             )
         }
 
@@ -214,7 +219,6 @@ fun AppNav(nav: NavHostController) {
             }
         }
 
-
         // ---------- EDITAR PERFIL ----------
         composable(Routes.EDIT_PROFILE) {
             EditProfileScreen(
@@ -224,6 +228,24 @@ fun AppNav(nav: NavHostController) {
                     user = updated
                     nav.popBackStack()
                 }
+            )
+        }
+
+        // ---------- MÁS ----------
+        composable(Routes.MAS) {
+            MasScreen(
+                onOpenQr = { nav.navigate(Routes.QR) },
+                onOpenSettings = { /* TODO */ },
+                onOpenAbout = { /* TODO */ },
+                onOpenMap = { nav.navigate(Routes.MAP) },   // 🆕 abre la vista de mapa
+                onBack = { nav.popBackStack() }
+            )
+        }
+
+        // ---------- MAPA DE SUCURSALES ----------
+        composable(Routes.MAP) {
+            MapScreen(
+                onBack = { nav.popBackStack() }
             )
         }
     }

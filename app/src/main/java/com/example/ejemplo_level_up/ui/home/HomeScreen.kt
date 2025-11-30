@@ -34,10 +34,11 @@ import com.example.ejemplo_level_up.viewmodel.HomeViewModel
 fun HomeScreen(
     onOpenDetail: (String) -> Unit,
     onOpenFavs: () -> Unit,
-    onOpenQr: () -> Unit,
+    onOpenQr: () -> Unit,          // 👉 ahora se usará desde la vista "Más"
     onOpenCategories: () -> Unit,
     onOpenProfile: () -> Unit,
-    onOpenCart: () -> Unit, // ✅ Abre el carrito
+    onOpenCart: () -> Unit,        // ✅ Abre el carrito
+    onOpenMore: () -> Unit,        // 🆕 Navega a la pantalla "Más"
     user: UserProfile?,
     isLoggedIn: Boolean,
     onLogout: () -> Unit,
@@ -69,35 +70,62 @@ fun HomeScreen(
         // ✅ Barra de navegación inferior
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
+
+                // 1) INICIO
                 NavigationBarItem(
                     selected = bottomSelected == 0,
                     onClick = { bottomSelected = 0 },
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") }
                 )
+
+                // 2) CATEGORÍAS
                 NavigationBarItem(
                     selected = bottomSelected == 1,
-                    onClick = { bottomSelected = 1; onOpenCategories() },
+                    onClick = {
+                        bottomSelected = 1
+                        onOpenCategories()
+                    },
                     icon = { Icon(Icons.Filled.Category, contentDescription = "Categorías") },
                     label = { Text("Categorías") }
                 )
+
+                // 3) FAVORITOS
                 NavigationBarItem(
                     selected = bottomSelected == 2,
-                    onClick = onOpenFavs,
+                    onClick = {
+                        bottomSelected = 2
+                        onOpenFavs()
+                    },
                     icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favoritos") },
                     label = { Text("Favoritos") }
                 )
+
+                // 4) PERFIL
                 NavigationBarItem(
                     selected = bottomSelected == 3,
-                    onClick = onOpenQr,
-                    icon = { Icon(Icons.Filled.QrCode, contentDescription = "QR") },
-                    label = { Text("QR") }
-                )
-                NavigationBarItem(
-                    selected = bottomSelected == 4,
-                    onClick = { bottomSelected = 4; onOpenProfile() },
+                    onClick = {
+                        bottomSelected = 3
+                        onOpenProfile()
+                    },
                     icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
                     label = { Text("Perfil") }
+                )
+
+                // 5) MÁS (usa ic_more.xml)
+                NavigationBarItem(
+                    selected = bottomSelected == 4,
+                    onClick = {
+                        bottomSelected = 4
+                        onOpenMore()
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_more),
+                            contentDescription = "Más"
+                        )
+                    },
+                    label = { Text("Más") }
                 )
             }
         }
@@ -135,7 +163,6 @@ fun HomeScreen(
             }
 
             Spacer(Modifier.height(8.dp))
-
 
             // --- Destacados ---
             SectionTitle("Destacados")
