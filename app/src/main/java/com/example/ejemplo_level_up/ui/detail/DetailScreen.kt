@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejemplo_level_up.ui.components.TopBar
 import com.example.ejemplo_level_up.viewmodel.DetailViewModel
 import com.example.ejemplo_level_up.viewmodel.FavoritesViewModel
+import com.example.ejemplo_level_up.viewmodel.CartViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -19,13 +20,17 @@ fun DetailScreen(
     id: String,
     onBack: () -> Unit, // 👈 nuevo parámetro para volver atrás
     dvm: DetailViewModel = viewModel(),
-    fvm: FavoritesViewModel = viewModel()
+    fvm: FavoritesViewModel = viewModel(),
+    cvm: CartViewModel
 ) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val game by dvm.game(id).collectAsState(initial = null)
     val favs by fvm.favIds.collectAsState(initial = emptySet())
     val isFav = id in favs
+    val isInCart by cvm.items.collectAsState()
+    val existsInCart = isInCart.containsKey(id)
+
 
     Scaffold(
         topBar = {
@@ -63,17 +68,34 @@ fun DetailScreen(
 
             // --- Botones principales ---
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                // Favoritos
                 Button(onClick = { scope.launch { fvm.toggle(id) } }) {
                     Text(if (isFav) "Quitar de Favoritos" else "Agregar a Favoritos")
                 }
 
+                // 🛒 NUEVO: Agregar al carrito
+                Button(
+                    onClick = {
+                        scope.launch {
+                            if (existsInCart) cvm.remove(id) else cvm.add(id)
+                        }
+                    }
+                ) {
+                    Text(
+                        text = if (existsInCart) "Quitar del carrito" else "Agregar al carrito"
+                    )
+                }
+
+
+                // Compartir
                 Button(
                     onClick = {
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "Mira este juego: ${game!!.title} — Precio: $${game!!.price}"
+                                "Mira este artículo: ${game!!.title} — Precio: $${game!!.price}"
                             )
                         }
                         ctx.startActivity(Intent.createChooser(intent, "Compartir con…"))
