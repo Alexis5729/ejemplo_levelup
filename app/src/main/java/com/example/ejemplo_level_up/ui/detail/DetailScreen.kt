@@ -86,8 +86,9 @@ fun DetailScreen(
                         text = if (existsInCart) "Quitar del carrito" else "Agregar al carrito"
                     )
                 }
+            }
 
-
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Compartir
                 Button(
                     onClick = {
