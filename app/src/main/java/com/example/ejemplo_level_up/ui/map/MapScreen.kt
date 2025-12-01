@@ -14,11 +14,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ejemplo_level_up.viewmodel.HomeViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -32,8 +37,17 @@ private val STORE_LOCATION = LatLng(-33.5983034, -70.5784048)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    homeViewModel: HomeViewModel = viewModel()
 ) {
+    // Observamos la comuna desde el ViewModel
+    val comunaState by homeViewModel.comuna.collectAsState()
+
+    // Cuando se entra a esta pantalla, pedimos actualizar la comuna
+    LaunchedEffect(Unit) {
+        homeViewModel.cargarComuna()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,7 +69,7 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Mapa ocupa 3/4 de la pantalla
+            // 📍 Mapa ocupa 3/4 de la pantalla
             AndroidView(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,7 +84,7 @@ fun MapScreen(
                 }
             )
 
-            // Información de la sucursal (1/4 de pantalla)
+            // ℹ️ Información de la sucursal + comuna detectada (1/4 de pantalla)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -86,6 +100,16 @@ fun MapScreen(
                     text = "Av. Concha y Toro 2557,\n" +
                             "8150215 Puente Alto,\n" +
                             "Región Metropolitana"
+                )
+
+                Text(
+                    text = "\nTu comuna detectada:",
+                    fontWeight = FontWeight.Bold
+                )
+
+                // 👇 Aquí el cambio importante
+                Text(
+                    text = comunaState ?: "Cargando comuna..."
                 )
             }
         }

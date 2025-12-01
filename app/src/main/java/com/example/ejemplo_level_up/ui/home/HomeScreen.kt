@@ -1,5 +1,10 @@
 package com.example.ejemplo_level_up.ui.home
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejemplo_level_up.R
 import com.example.ejemplo_level_up.data.model.Game
@@ -34,52 +40,83 @@ import com.example.ejemplo_level_up.viewmodel.HomeViewModel
 fun HomeScreen(
     onOpenDetail: (String) -> Unit,
     onOpenFavs: () -> Unit,
-    onOpenQr: () -> Unit,          // 👉 ahora se usará desde la vista "Más"
+    onOpenQr: () -> Unit,
     onOpenCategories: () -> Unit,
     onOpenProfile: () -> Unit,
-    onOpenCart: () -> Unit,        // ✅ Abre el carrito
-    onOpenMore: () -> Unit,        // 🆕 Navega a la pantalla "Más"
+    onOpenCart: () -> Unit,
+    onOpenMore: () -> Unit,
     user: UserProfile?,
     isLoggedIn: Boolean,
     onLogout: () -> Unit,
     vm: HomeViewModel = viewModel()
 ) {
-    LaunchedEffect(Unit) { vm.seed() }
+    val context = LocalContext.current
+
+    // Seed inicial de juegos + primera carga de comuna
+    LaunchedEffect(Unit) {
+        vm.seed()
+
+        if (hasLocationPermission(context)) {
+            vm.cargarComuna()
+        } else {
+            vm.setComunaNoDisponible()
+        }
+    }
 
     val games by vm.games.collectAsState(initial = emptyList())
+    val comuna by vm.comuna.collectAsState()
 
-    // Estado UI
     var query by rememberSaveable { mutableStateOf("") }
     val categories = listOf("Periféricos", "Accesorios", "Juegos", "Consolas", "PC", "Ofertas")
     var selectedCat by rememberSaveable { mutableStateOf(0) }
     var bottomSelected by rememberSaveable { mutableStateOf(0) }
 
+    // Launcher para pedir permisos
+    val locationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            val granted =
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                        permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+            if (granted) {
+                vm.cargarComuna()
+            } else {
+                vm.setComunaNoDisponible()
+            }
+        }
+
+    // Si no tenemos permisos, los pedimos una sola vez
+    LaunchedEffect(Unit) {
+        if (!hasLocationPermission(context)) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-
-        // ✅ TopBar con carrito funcional
         topBar = {
             MainTopBar(
                 user = user,
                 isLoggedIn = isLoggedIn,
                 onLogout = onLogout,
-                onCartClick = onOpenCart // ✅ AHORA FUNCIONA DESDE HOME
+                onCartClick = onOpenCart
             )
         },
-
-        // ✅ Barra de navegación inferior
         bottomBar = {
             NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
-
-                // 1) INICIO
                 NavigationBarItem(
                     selected = bottomSelected == 0,
                     onClick = { bottomSelected = 0 },
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
                     label = { Text("Inicio") }
                 )
-
-                // 2) CATEGORÍAS
                 NavigationBarItem(
                     selected = bottomSelected == 1,
                     onClick = {
@@ -89,8 +126,6 @@ fun HomeScreen(
                     icon = { Icon(Icons.Filled.Category, contentDescription = "Categorías") },
                     label = { Text("Categorías") }
                 )
-
-                // 3) FAVORITOS
                 NavigationBarItem(
                     selected = bottomSelected == 2,
                     onClick = {
@@ -100,8 +135,6 @@ fun HomeScreen(
                     icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favoritos") },
                     label = { Text("Favoritos") }
                 )
-
-                // 4) PERFIL
                 NavigationBarItem(
                     selected = bottomSelected == 3,
                     onClick = {
@@ -111,8 +144,6 @@ fun HomeScreen(
                     icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
                     label = { Text("Perfil") }
                 )
-
-                // 5) MÁS (usa ic_more.xml)
                 NavigationBarItem(
                     selected = bottomSelected == 4,
                     onClick = {
@@ -136,7 +167,7 @@ fun HomeScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
         ) {
-            // --- Buscador ---
+            // Buscador
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
@@ -148,7 +179,26 @@ fun HomeScreen(
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             )
 
-            // --- Chips de categorías ---
+            // Texto de comuna bajo el saludo
+            comuna?.let { c ->
+                val text = when (c) {
+                    "NO_DISPONIBLE" ->
+                        "No pudimos obtener tu comuna (permiso denegado o sin señal)."
+                    else ->
+                        "Actualmente estás en la comuna de $c"
+                }
+
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp)
+                )
+            }
+
+            // Chips de categorías
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -164,7 +214,7 @@ fun HomeScreen(
 
             Spacer(Modifier.height(8.dp))
 
-            // --- Destacados ---
+            // Destacados
             SectionTitle("Destacados")
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
@@ -175,7 +225,7 @@ fun HomeScreen(
                 }
             }
 
-            // --- Catálogo ---
+            // Catálogo
             SectionTitle("Todos los productos")
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -192,7 +242,21 @@ fun HomeScreen(
     }
 }
 
-// ---------- Estilos del catálogo ----------
+// ---------- Helpers y UI auxiliares ----------
+
+private fun hasLocationPermission(context: Context): Boolean {
+    val fine = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    val coarse = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+
+    return fine || coarse
+}
 
 @Composable
 private fun SectionTitle(text: String) {
@@ -233,7 +297,9 @@ private fun ProductCardHorizontal(g: Game, onOpenDetail: (String) -> Unit) {
             Column(Modifier.fillMaxWidth()) {
                 Text(g.title, color = MaterialTheme.colorScheme.primary, maxLines = 1)
                 Text("Precio: $${g.price}")
-                g.offerPrice?.let { Text("Oferta: $${it}", color = MaterialTheme.colorScheme.secondary) }
+                g.offerPrice?.let {
+                    Text("Oferta: $${it}", color = MaterialTheme.colorScheme.secondary)
+                }
             }
         }
     }
@@ -265,7 +331,9 @@ private fun ProductCardGrid(g: Game, onOpenDetail: (String) -> Unit) {
             Spacer(Modifier.height(8.dp))
             Text(g.title, color = MaterialTheme.colorScheme.primary, maxLines = 2)
             Text("Precio: $${g.price}")
-            g.offerPrice?.let { Text("Oferta: $${it}", color = MaterialTheme.colorScheme.secondary) }
+            g.offerPrice?.let {
+                Text("Oferta: $${it}", color = MaterialTheme.colorScheme.secondary)
+            }
         }
     }
 }
