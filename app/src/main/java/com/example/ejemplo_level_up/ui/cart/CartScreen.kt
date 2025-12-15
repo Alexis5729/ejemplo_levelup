@@ -55,8 +55,8 @@ fun CartScreen(
 
     // id + cantidad  ->  Game + cantidad
     val detailedItems = remember(cartItems, games) {
-        cartItems.mapNotNull { (id, qty) ->
-            games.find { it.id == id }?.let { game -> game to qty }
+        cartItems.mapNotNull { item ->
+            games.find { it.id == item.gameId }?.let { game -> game to item.quantity }
         }
     }
 

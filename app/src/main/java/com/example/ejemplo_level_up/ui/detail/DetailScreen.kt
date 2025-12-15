@@ -29,7 +29,7 @@ fun DetailScreen(
     val favs by fvm.favIds.collectAsState(initial = emptySet())
     val isFav = id in favs
     val isInCart by cvm.items.collectAsState()
-    val existsInCart = isInCart.containsKey(id)
+    val existsInCart = isInCart.any { it.gameId == id }
 
 
     Scaffold(

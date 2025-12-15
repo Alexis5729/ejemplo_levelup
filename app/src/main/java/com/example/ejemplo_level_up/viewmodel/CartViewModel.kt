@@ -1,43 +1,23 @@
 package com.example.ejemplo_level_up.viewmodel
 
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.ejemplo_level_up.data.database.GameDatabase
+import com.example.ejemplo_level_up.data.repository.CartRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class CartViewModel : ViewModel() {
+class CartViewModel(app: Application) : AndroidViewModel(app) {
 
-    // id del producto -> cantidad
-    private val _items = MutableStateFlow<Map<String, Int>>(emptyMap())
-    val items: StateFlow<Map<String, Int>> = _items
+    private val repo = CartRepository(GameDatabase.getInstance(app).cartDao())
 
-    // CREATE / UPDATE (+1)
-    fun add(id: String) {
-        val current = _items.value.toMutableMap()
-        val oldQty = current[id] ?: 0
-        current[id] = oldQty + 1
-        _items.value = current
-    }
+    val items = repo.items()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // UPDATE: setear cantidad exacta
-    fun setQuantity(id: String, quantity: Int) {
-        val current = _items.value.toMutableMap()
-        if (quantity <= 0) {
-            current.remove(id) // si llega a 0, lo sacamos
-        } else {
-            current[id] = quantity
-        }
-        _items.value = current
-    }
-
-    // DELETE
-    fun remove(id: String) {
-        val current = _items.value.toMutableMap()
-        current.remove(id)
-        _items.value = current
-    }
-
-    // Opcional: vaciar carrito
-    fun clear() {
-        _items.value = emptyMap()
-    }
+    fun add(id: String) = viewModelScope.launch { repo.addOne(id) }
+    fun setQuantity(id: String, quantity: Int) = viewModelScope.launch { repo.setQuantity(id, quantity) }
+    fun remove(id: String) = viewModelScope.launch { repo.remove(id) }
+    fun clear() = viewModelScope.launch { repo.clear() }
 }

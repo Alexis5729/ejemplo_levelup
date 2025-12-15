@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.ejemplo_level_up.data.dao.CartDao
 import com.example.ejemplo_level_up.data.dao.GameDao
+import com.example.ejemplo_level_up.data.model.CartItemEntity
 import com.example.ejemplo_level_up.data.model.Game
 
-@Database(entities = [Game::class], version = 1, exportSchema = false)
+@Database(entities = [Game::class, CartItemEntity::class], version = 2, exportSchema = false)
 abstract class GameDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
+    abstract fun cartDao(): CartDao
 
     companion object {
         @Volatile private var INSTANCE: GameDatabase? = null
