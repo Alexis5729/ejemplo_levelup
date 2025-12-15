@@ -2,10 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permiso de cámara (necesario para el lector QR) -->
+    <!-- 📷 Permiso de cámara (lector QR) -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- ✅ Permiso de Internet (necesario para Google Maps) -->
+    <!-- 📍 Permisos de ubicación -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- 🌐 Permiso de Internet (Google Maps, APIs, etc.) -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -19,7 +23,7 @@
         android:theme="@style/Theme.Ejemplolevelup"
         tools:targetApi="33">
 
-        <!-- ✅ API key de Google Maps -->
+        <!-- 🔑 API key de Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAmONuIChy6Qm8M7299m_rgpEHBT1C0pJQ" />
