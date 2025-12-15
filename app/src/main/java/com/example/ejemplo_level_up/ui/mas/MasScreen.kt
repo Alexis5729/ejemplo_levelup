@@ -25,8 +25,9 @@ fun MasScreen(
     onOpenQr: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
-    onOpenMap: () -> Unit,   // 👈 este es nuevo
-    onBack: () -> Unit       // 👈 top bar atrás
+    onOpenMap: () -> Unit,
+    onOpenApi: () -> Unit,   // ✅ NUEVO
+    onBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -70,12 +71,22 @@ fun MasScreen(
 
             Divider()
 
-            // ---------- ÍTEM: Mapa de sucursales (nuevo) ----------
+            // ---------- ÍTEM: Mapa de sucursales ----------
             MasItemRow(
                 icon = { Icon(Icons.Filled.LocationOn, contentDescription = "Mapa sucursales") },
                 title = "Encuentra nuestras sucursales aquí",
                 subtitle = "Abrir mapa con nuestras tiendas",
                 onClick = onOpenMap
+            )
+
+            Divider()
+
+            // ---------- ÍTEM: API externa (posts) ----------
+            MasItemRow(
+                icon = { Icon(Icons.Filled.Info, contentDescription = "API externa") },
+                title = "Noticias / Posts (API externa)",
+                subtitle = "Consume datos desde internet con Retrofit",
+                onClick = onOpenApi
             )
 
             Divider()

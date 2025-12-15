@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.ejemplo_level_up.ui.api.PostScreen
 import com.example.ejemplo_level_up.ui.cart.CartScreen
 import com.example.ejemplo_level_up.ui.categories.CategoriesScreen
 import com.example.ejemplo_level_up.ui.detail.DetailScreen
@@ -23,7 +24,7 @@ import com.example.ejemplo_level_up.ui.profile.UserProfile
 import com.example.ejemplo_level_up.ui.qr.QrScannerScreen
 import com.example.ejemplo_level_up.ui.register.RegisterScreen
 import com.example.ejemplo_level_up.ui.splash.SplashScreen
-import com.example.ejemplo_level_up.viewmodel.CartViewModel   // 👈 NUEVO
+import com.example.ejemplo_level_up.viewmodel.CartViewModel
 
 // ---------- Definición de rutas ----------
 object Routes {
@@ -40,6 +41,7 @@ object Routes {
     const val CART = "cart"
     const val MAS = "mas"
     const val MAP = "map"
+    const val POSTS = "posts" // ✅ NUEVO
 }
 
 @Composable
@@ -173,7 +175,7 @@ fun AppNav(nav: NavHostController) {
                     nav.navigate(Routes.CART)
                 },
                 onCartClick = { /* ya estás en el carrito */ },
-                cartViewModel = cartVm          // 👈 usa el VM compartido
+                cartViewModel = cartVm
             )
         }
 
@@ -197,7 +199,7 @@ fun AppNav(nav: NavHostController) {
             DetailScreen(
                 id = id,
                 onBack = { nav.popBackStack() },
-                cvm = cartVm        // 👈 le pasas el mismo CartViewModel
+                cvm = cartVm
             )
         }
 
@@ -223,6 +225,12 @@ fun AppNav(nav: NavHostController) {
                         }
                     }
                 )
+            } else {
+                nav.navigate(Routes.LOGIN) {
+                    popUpTo(Routes.HOME) { inclusive = true }
+                    launchSingleTop = true
+                    restoreState = false
+                }
             }
         }
 
@@ -245,6 +253,7 @@ fun AppNav(nav: NavHostController) {
                 onOpenSettings = { /* TODO */ },
                 onOpenAbout = { /* TODO */ },
                 onOpenMap = { nav.navigate(Routes.MAP) },
+                onOpenApi = { nav.navigate(Routes.POSTS) }, // ✅ NUEVO
                 onBack = { nav.popBackStack() }
             )
         }
@@ -252,6 +261,13 @@ fun AppNav(nav: NavHostController) {
         // ---------- MAPA DE SUCURSALES ----------
         composable(Routes.MAP) {
             MapScreen(
+                onBack = { nav.popBackStack() }
+            )
+        }
+
+        // ---------- API EXTERNA (POSTS) ----------
+        composable(Routes.POSTS) {
+            PostScreen(
                 onBack = { nav.popBackStack() }
             )
         }
